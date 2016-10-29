@@ -1,14 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using System.Reflection;
-using Microsoft.CSharp;
-using System.CodeDom.Compiler;
-using System;
-using System.Collections.Generic;
+﻿using ScriptImporter;
 using System.IO;
-using System.Linq;
-using ScriptImporter;
+using UnityEditor;
+using UnityEngine;
 
 public class test : EditorWindow
 {
