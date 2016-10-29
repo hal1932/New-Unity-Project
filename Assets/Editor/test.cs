@@ -21,13 +21,19 @@ public class test : EditorWindow
         if (GUILayout.Button("aaa"))
         {
 #if UNITY_EDITOR_WIN
+            var unitySystemRoot = @"D:\Program Files\Unity\Editor\Data\Managed"
+#elif UNITY_EDITOR_OSX
+            var unitySystemRoot = @"/Applications/Unity/Unity.app/Contents/Managed";
+            Environment.SetEnvironmentVariable(
+                "PATH",
+                Environment.GetEnvironmentVariable("PATH") + ":/Applications/Unity/Unity.app/Contents/Mono/bin");
+#endif
+
             var references = new[]
             {
-                @"D:\Program Files\Unity\Editor\Data\Managed\UnityEngine.dll",
-                @"D:\Program Files\Unity\Editor\Data\Managed\UnityEditor.dll",
+                Path.Combine(unitySystemRoot, @"UnityEngine.dll"),
+                Path.Combine(unitySystemRoot, @"UnityEditor.dll"),
             };
-#elif UNITY_EDITOR_OSX
-#endif
 
             var param = new CompilerParameters(references)
             {
@@ -44,6 +50,7 @@ public class test : EditorWindow
             {
                 string.Join(Path.DirectorySeparatorChar.ToString(), new[] { Application.dataPath, "..", "Class1.cs" }),
             };
+
             var result = provider.CompileAssemblyFromFile(param, sources);
             if (result.Errors.Count > 0)
             {
