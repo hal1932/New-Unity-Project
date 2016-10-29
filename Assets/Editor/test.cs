@@ -21,9 +21,9 @@ public class test : EditorWindow
         if (GUILayout.Button("aaa"))
         {
 #if UNITY_EDITOR_WIN
-            var unitySystemRoot = @"D:\Program Files\Unity\Editor\Data\Managed";
+            var unityLibRoot = @"D:\Program Files\Unity\Editor\Data\Managed";
 #elif UNITY_EDITOR_OSX
-            var unitySystemRoot = @"/Applications/Unity/Unity.app/Contents/Managed";
+            var unityLibRoot = @"/Applications/Unity/Unity.app/Contents/Managed";
             Environment.SetEnvironmentVariable(
                 "PATH",
                 Environment.GetEnvironmentVariable("PATH") + ":/Applications/Unity/Unity.app/Contents/Mono/bin");
@@ -31,8 +31,8 @@ public class test : EditorWindow
 
             var references = new[]
             {
-                Path.Combine(unitySystemRoot, @"UnityEngine.dll"),
-                Path.Combine(unitySystemRoot, @"UnityEditor.dll"),
+                Path.Combine(unityLibRoot, @"UnityEngine.dll"),
+                Path.Combine(unityLibRoot, @"UnityEditor.dll"),
             };
 
             var param = new CompilerParameters(references)
