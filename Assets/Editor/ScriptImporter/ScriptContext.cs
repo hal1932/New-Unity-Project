@@ -15,6 +15,7 @@ namespace ScriptImporter
         public string CompilerVersion { get; set; }
         public string CompilerOptions { get; set; }
         public int WarningLevel { get; set; }
+        public bool IncludeDebugInformation { get; set; }
         public bool EnablePreprocess { get; set; }
 
         public string[] Scripts { get; private set; }
@@ -67,6 +68,7 @@ namespace ScriptImporter
             CompilerVersion = "v2.0";
             CompilerOptions = "/optimize";
             WarningLevel = 4;
+            IncludeDebugInformation = false;
             EnablePreprocess = true;
         }
 
@@ -121,7 +123,7 @@ namespace ScriptImporter
             var options = new CompilerParameters(references)
             {
                 GenerateExecutable = false,
-                IncludeDebugInformation = false,
+                IncludeDebugInformation = IncludeDebugInformation,
                 WarningLevel = WarningLevel,
                 CompilerOptions = CompilerOptions,
 
