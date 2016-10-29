@@ -21,7 +21,7 @@ public class test : EditorWindow
         if (GUILayout.Button("aaa"))
         {
 #if UNITY_EDITOR_WIN
-            var unitySystemRoot = @"D:\Program Files\Unity\Editor\Data\Managed"
+            var unitySystemRoot = @"D:\Program Files\Unity\Editor\Data\Managed";
 #elif UNITY_EDITOR_OSX
             var unitySystemRoot = @"/Applications/Unity/Unity.app/Contents/Managed";
             Environment.SetEnvironmentVariable(
