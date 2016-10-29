@@ -32,7 +32,7 @@ public class test : EditorWindow
                 {
                     foreach (var err in context.CompileErros)
                     {
-                        Debug.Log(err);
+                        Debug.LogError(err);
                     }
                 }
             }
