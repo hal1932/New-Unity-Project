@@ -57,7 +57,7 @@ namespace ScriptImporter
                     }
 
                     string directive;
-                    var filepath = ParseDirectiveTargetFile(out directive, line, rootPath);
+                    var filepath = ParseDirective(out directive, line, rootPath);
                     if (filepath == null)
                     {
                         continue;
@@ -86,7 +86,7 @@ namespace ScriptImporter
             }
         }
 
-        private static string ParseDirectiveTargetFile(out string directive, string line, string rootPath)
+        private static string ParseDirective(out string directive, string line, string rootPath)
         {
             var items = line.Split('"');
             if (items.Length < 2)

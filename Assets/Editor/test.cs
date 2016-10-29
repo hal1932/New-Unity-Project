@@ -35,6 +35,14 @@ public class test : EditorWindow
                         Debug.LogError(err);
                     }
                 }
+
+                if (!context.BuildDirectory(@"test.dll", Path.Combine(Application.dataPath, ".."), SearchOption.TopDirectoryOnly))
+                {
+                    foreach (var err in context.CompileErros)
+                    {
+                        Debug.LogError(err);
+                    }
+                }
             }
         }
     }

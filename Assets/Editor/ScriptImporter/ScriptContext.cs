@@ -82,13 +82,31 @@ namespace ScriptImporter
             return LoadImpl();
         }
 
+        public bool BuildDirectory(string outputPath, string path, SearchOption searchOption = SearchOption.AllDirectories)
+        {
+            Scripts = Directory.GetFiles(Path.GetFullPath(path), "*.cs", searchOption);
+            return BuildImpl(outputPath);
+        }
+
+        public bool BuildFiles(string outputPath, params string[] paths)
+        {
+            Scripts = paths.Select(path => Path.GetFullPath(path)).ToArray();
+            return BuildImpl(outputPath);
+        }
+
         private bool LoadImpl()
         {
-            _compilerResults = Compile();
+            _compilerResults = CompileImpl();
             return _compilerResults.Errors.Count == 0;
         }
 
-        private CompilerResults Compile()
+        private bool BuildImpl(string outputPath)
+        {
+            _compilerResults = CompileImpl(outputPath);
+            return _compilerResults.Errors.Count == 0;
+        }
+
+        private CompilerResults CompileImpl(string outputAssembly = null)
         {
             var unityLibRoot = string.Join(
                 Path.DirectorySeparatorChar.ToString(),
@@ -103,11 +121,14 @@ namespace ScriptImporter
             var options = new CompilerParameters(references)
             {
                 GenerateExecutable = false,
-                GenerateInMemory = true,
                 IncludeDebugInformation = false,
                 WarningLevel = WarningLevel,
                 CompilerOptions = CompilerOptions,
+
+                GenerateInMemory = (outputAssembly == null),
+                OutputAssembly = outputAssembly,
             };
+
 
             var provider = new CSharpCodeProvider(
                 new Dictionary<string, string>() { { "CompilerVersion", CompilerVersion } });
