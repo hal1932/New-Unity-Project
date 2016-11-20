@@ -88,12 +88,23 @@
     <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
       <HintPath>Library\UnityAssemblies\SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
     </Reference>
+    <Reference Include="MiniJSON">
+      <HintPath>Assets\Plugins\MiniJSON.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Editor\ScriptImporter\AssemblyExtensions.cs" />
-    <Compile Include="Assets\Editor\ScriptImporter\Preprocessor.cs" />
-    <Compile Include="Assets\Editor\ScriptImporter\ScriptContext.cs" />
-    <Compile Include="Assets\Editor\test.cs" />
+    <Compile Include="Assets\Editor\EditorUtil\Assetutil.cs" />
+    <Compile Include="Assets\Editor\EditorUtil\Disposable.cs" />
+    <Compile Include="Assets\Editor\EditorUtil\ScopeGUI.cs" />
+    <Compile Include="Assets\Editor\ResourceLocker.cs" />
+    <Compile Include="Assets\Editor\ScriptComposer\AssemblyInfo.cs" />
+    <Compile Include="Assets\Editor\ScriptComposer\BuildSettings.cs" />
+    <Compile Include="Assets\Editor\ScriptComposer\Composer.cs" />
+    <Compile Include="Assets\Editor\ScriptComposer\MainMenu.cs" />
+    <Compile Include="Assets\Editor\ScriptComposer\Preference.cs" />
+    <Compile Include="Assets\Editor\ScriptLoader\AssemblyExtensions.cs" />
+    <Compile Include="Assets\Editor\ScriptLoader\Preprocessor.cs" />
+    <Compile Include="Assets\Editor\ScriptLoader\ScriptContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>
