@@ -4,9 +4,17 @@ using UnityEngine;
 
 namespace ScriptComposer
 {
+    public enum AssemblyNameSelection
+    {
+        FirstSelection,
+        LastSelection,
+        ManualInput,
+    }
+
     static class Preference
     {
         public static string MonoDirectory { get; private set; }
+        public static AssemblyNameSelection AssemblyNameSelection { get; private set; }
 
         static Preference()
         {
@@ -44,6 +52,9 @@ namespace ScriptComposer
                 MonoDirectory = monoDir.TrimEnd('/');
                 EditorUserSettings.SetConfigValue("MONO_DIR", MonoDirectory);
             }
+
+            AssemblyNameSelection = (AssemblyNameSelection)EditorGUILayout.EnumPopup(
+                "アセンブリ名の決定方法", AssemblyNameSelection);
         }
     }
 }

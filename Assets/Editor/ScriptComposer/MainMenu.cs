@@ -33,7 +33,20 @@ namespace ScriptComposer
                         .Select(guid => AssetDatabase.GUIDToAssetPath(guid)))
                 .ToArray();
 
-            var assemblyName = Path.GetFileNameWithoutExtension(paths.First());
+            string assemblyName;
+            switch (Preference.AssemblyNameSelection)
+            {
+                case AssemblyNameSelection.FirstSelection:
+                    assemblyName = Path.GetFileNameWithoutExtension(paths.First());
+                    break;
+
+                case AssemblyNameSelection.LastSelection:
+                    assemblyName = Path.GetFileNameWithoutExtension(paths.Last());
+                    break;
+
+                default:
+                    throw new System.Exception("invalid Preference.AssemblyNameSelection");
+            }
 
             string assemblyPath;
             using (new LockReloadAssemblyScope())
