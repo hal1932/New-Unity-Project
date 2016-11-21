@@ -1,9 +1,8 @@
-﻿using UnityEngine;
-using System.Collections;
-using UnityEditor;
-using System.Linq;
+﻿using EditorUtil;
 using System.IO;
-using EditorUtil;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 namespace ScriptComposer
 {
@@ -25,8 +24,16 @@ namespace ScriptComposer
         [MenuItem(cItemName_Assemble)]
         public static void Assemble()
         {
-            var scripts = Selection.objects.Select(obj => AssetDatabase.GetAssetPath(obj))
+            var paths = Selection.objects.Select(obj => AssetDatabase.GetAssetPath(obj));
+
+            var directories = paths.Where(path => AssetDatabase.IsValidFolder(path)).ToArray();
+            var scripts = paths.Where(x => x.EndsWith("*.cs"))
+                .Union(
+                    AssetDatabase.FindAssets("t:script", directories)
+                        .Select(guid => AssetDatabase.GUIDToAssetPath(guid)))
                 .ToArray();
+
+            var assemblyName = Path.GetFileNameWithoutExtension(paths.First());
 
             string assemblyPath;
             using (new LockReloadAssemblyScope())
@@ -34,7 +41,7 @@ namespace ScriptComposer
             {
                 var settings = BuildSettings.FindOrCreateInstance();
                 var composer = new Composer(settings);
-                assemblyPath = composer.BuildScripts(scripts);
+                assemblyPath = composer.BuildScripts(scripts, assemblyName);
 
                 AssetDatabase.SaveAssets();
             }
@@ -72,7 +79,7 @@ namespace ScriptComposer
 
         [MenuItem(cItemName_Settings, true)]
         [MenuItem(cItemName_Assemble, true)]
-        public static bool CanApplyScriptMenu()
+        public static bool CanApplyAssembleMenu()
         {
             var targets = Selection.objects;
 
@@ -81,29 +88,24 @@ namespace ScriptComposer
                 return false;
             }
 
-            var scripts = targets.Where(obj => obj.GetType() == typeof(MonoScript))
-                .Select(obj => AssetDatabase.GetAssetPath(obj))
+            var paths = targets.Select(obj => AssetDatabase.GetAssetPath(obj))
                 .ToArray();
-            if (scripts.Length == 0)
+
+            if (paths.Any(path => AssetDatabase.IsValidFolder(path)))
             {
-                return false;
+                return true;
             }
 
-            return true;
+            return paths.Any(path => path.EndsWith(".cs"));
         }
 
         [MenuItem(cItemName_Settings, true)]
         [MenuItem(cItemName_Disassemble, true)]
-        public static bool CanApplyAssemblyMenu()
+        public static bool CanApplyDisassembleMenu()
         {
             var target = Selection.activeObject;
 
             if (target == null)
-            {
-                return false;
-            }
-
-            if (target.GetType() != typeof(DefaultAsset))
             {
                 return false;
             }

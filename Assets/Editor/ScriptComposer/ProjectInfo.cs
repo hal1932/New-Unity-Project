@@ -1,12 +1,8 @@
-﻿using ScriptComposer;
-using System;
-using System.Collections.Generic;
+﻿using EditorUtil;
 using System.IO;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
-namespace EditorUtil
+namespace ScriptComposer
 {
     static class ProjectInfo
     {

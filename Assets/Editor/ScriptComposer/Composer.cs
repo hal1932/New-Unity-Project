@@ -1,9 +1,6 @@
 ﻿using EditorUtil;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -16,18 +13,23 @@ namespace ScriptComposer
             _settings = settings;
         }
 
-        public string BuildScripts(string[] scripts)
+        public string BuildScripts(string[] scripts, string assemblyName)
         {
             if (scripts.Length == 0)
             {
                 return null;
             }
 
-            var assemblyName = Path.GetFileNameWithoutExtension(scripts.First());
-
             // スクリプトのパスをいちいち指定してたらコマンドラインが文字数オーバーするかもしれないから
             // 一旦テンポラリに全部コピーして *.cs で指定できるようにする。
             var tmpScriptsDir = AssetUtil.CombinePath(Application.temporaryCachePath, assemblyName);
+
+            if (Directory.Exists(tmpScriptsDir))
+            {
+                Directory.Delete(tmpScriptsDir, true);
+                Directory.CreateDirectory(tmpScriptsDir);
+            }
+
             foreach (var script in scripts)
             {
                 var source = AssetUtil.CombinePath(ProjectInfo.RootPath, script);

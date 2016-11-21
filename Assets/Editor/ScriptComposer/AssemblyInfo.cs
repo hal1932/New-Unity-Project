@@ -1,9 +1,7 @@
 ﻿using EditorUtil;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -109,6 +107,16 @@ namespace ScriptComposer
             foreach (var source in Sources)
             {
                 AssetDatabase.DeleteAsset(source.AssetPath);
+            }
+
+            var directories = Sources.Select(x => Path.GetDirectoryName(x.AssetPath)).Distinct();
+            foreach (var directory in directories)
+            {
+                var files = AssetDatabase.FindAssets(string.Empty, new[] { directory });
+                if (!files.Any())
+                {
+                    AssetDatabase.DeleteAsset(directory);
+                }
             }
         }
 
