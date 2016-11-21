@@ -12,11 +12,11 @@ namespace ScriptComposer
     [Serializable]
     public class SourceInfo
     {
-        public string FilePath;
+        public string AssetPath;
 
         public SourceInfo(string source, BuildSettings settings, string assemblyName)
         {
-            FilePath = source;
+            AssetPath = source;
 
             _settings = settings;
             _assemblyName = assemblyName;
@@ -24,13 +24,11 @@ namespace ScriptComposer
 
         public string GetCachedScriptPath()
         {
-            var projectRoot = AssetUtil.GetProjectRoot();
-            return string.Format(
-                    "{0}/{1}/{2}/{3}",
-                    projectRoot,
+            return AssetUtil.CombinePath(
+                    ProjectInfo.RootPath,
                     _settings.SourceCodeCacheRoot,
                     _assemblyName,
-                    FilePath);
+                    AssetPath);
         }
 
         // TODO: 汚い
@@ -60,24 +58,20 @@ namespace ScriptComposer
 
             _settings = settings;
 
-            _destRoot = string.Format(
-                "{0}/{1}/{2}",
-                AssetUtil.GetProjectRoot(),
+            _destRoot = AssetUtil.CombinePath(
+                ProjectInfo.RootPath,
                 _settings.SourceCodeCacheRoot,
                 Path.GetFileNameWithoutExtension(assembly));
         }
 
         public static AssemblyInfo LoadFromFile(BuildSettings settings, string assemblyName)
         {
-            var destRoot = string.Format(
-                "{0}/{1}/{2}",
-                AssetUtil.GetProjectRoot(),
+            var destRoot = AssetUtil.CombinePath(
+                ProjectInfo.RootPath,
                 settings.SourceCodeCacheRoot,
                 assemblyName);
 
-            var configPath = string.Format(
-                "{0}/{1}.json",
-                destRoot, assemblyName);
+            var configPath = AssetUtil.CombinePath(destRoot, assemblyName + ".json");
             var jsonStr = File.ReadAllText(configPath);
             var instance = JsonUtility.FromJson<AssemblyInfo>(jsonStr);
 
@@ -96,27 +90,25 @@ namespace ScriptComposer
             DeleteCaches();
             Directory.CreateDirectory(_destRoot);
 
-            var configPath = string.Format(
-                "{0}/{1}.json",
-                _destRoot, Path.GetFileNameWithoutExtension(Assembly));
+            var configPath = AssetUtil.CombinePath(
+                _destRoot,
+                Path.GetFileNameWithoutExtension(Assembly) + ".json");
             var jsonStr = JsonUtility.ToJson(this);
             File.WriteAllText(configPath, jsonStr);
         }
 
         public void StashScripts()
         {
-            var projectRoot = AssetUtil.GetProjectRoot();
-
             foreach (var source in Sources)
             {
-                var sourcePath = string.Format("{0}/{1}", projectRoot, source.FilePath);
-                var destPath = string.Format("{0}/{1}", _destRoot, source.FilePath);
+                var sourcePath = AssetUtil.CombinePath(ProjectInfo.RootPath, source.AssetPath);
+                var destPath = AssetUtil.CombinePath(_destRoot, source.AssetPath);
                 AssetUtil.CopyFile(sourcePath, destPath, true);
             }
 
             foreach (var source in Sources)
             {
-                AssetDatabase.DeleteAsset(source.FilePath);
+                AssetDatabase.DeleteAsset(source.AssetPath);
             }
         }
 

@@ -10,9 +10,9 @@ namespace EditorUtil
 {
     public static class AssetUtil
     {
-        public static string GetProjectRoot()
+        public static string CombinePath(params string[] paths)
         {
-            return Path.GetDirectoryName(Application.dataPath);
+            return string.Join("/", paths.Select(x => x.Trim('/')).ToArray());
         }
 
         public static bool CopyFile(string source, string dest, bool overwrite)
@@ -58,25 +58,6 @@ namespace EditorUtil
                         Path.GetFileName(current));
                 }
             }
-        }
-
-        public static bool MoveAsset(string source, string dest, bool overwrite)
-        {
-            var destExists = AssetExists(dest);
-            if (!overwrite && destExists)
-            {
-                return false;
-            }
-
-            CreateAssetDirectory(Path.GetDirectoryName(dest));
-
-            if (destExists)
-            {
-                AssetDatabase.DeleteAsset(dest);
-            }
-            AssetDatabase.MoveAsset(source, dest);
-
-            return true;
         }
     }
 }

@@ -112,7 +112,7 @@ namespace ScriptLoader
         {
             var unityLibRoot = string.Join(
                 Path.DirectorySeparatorChar.ToString(),
-                new[] { AssetUtil.GetProjectRoot(), "Library", "UnityAssemblies" });
+                new[] { ProjectInfo.UnityAssemblyRoot });
             
             var references = new[]
             {
