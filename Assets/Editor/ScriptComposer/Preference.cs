@@ -8,7 +8,6 @@ namespace ScriptComposer
     {
         FirstSelection,
         LastSelection,
-        ManualInput,
     }
 
     static class Preference
