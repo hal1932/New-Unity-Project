@@ -13,17 +13,35 @@ namespace ScriptComposer
     public class SourceInfo
     {
         public string FilePath;
-        public long FileTime;
 
-        public DateTime LastUpdated { get { return DateTime.FromFileTimeUtc(FileTime); } }
-
-        public SourceInfo(string source)
+        public SourceInfo(string source, BuildSettings settings, string assemblyName)
         {
             FilePath = source;
 
-            var fullpath = string.Format("{0}/{1}", AssetUtil.GetProjectRoot(), source);
-            FileTime = new FileInfo(fullpath).LastWriteTime.ToFileTimeUtc();
+            _settings = settings;
+            _assemblyName = assemblyName;
         }
+
+        public string GetCachedScriptPath()
+        {
+            var projectRoot = AssetUtil.GetProjectRoot();
+            return string.Format(
+                    "{0}/{1}/{2}/{3}",
+                    projectRoot,
+                    _settings.SourceCodeCacheRoot,
+                    _assemblyName,
+                    FilePath);
+        }
+
+        // TODO: 汚い
+        internal void SetupInternal(BuildSettings settings, string assemblyName)
+        {
+            _settings = settings;
+            _assemblyName = assemblyName;
+        }
+
+        private BuildSettings _settings;
+        private string _assemblyName;
     }
 
     [Serializable]
@@ -35,7 +53,10 @@ namespace ScriptComposer
         public AssemblyInfo(BuildSettings settings, string assembly, string[] sources)
         {
             Assembly = assembly;
-            Sources = sources.Select(x => new SourceInfo(x)).ToArray();
+
+            var assemblyName = Path.GetFileNameWithoutExtension(Assembly);
+            Sources = sources.Select(x => new SourceInfo(x, settings, assemblyName))
+                .ToArray();
 
             _settings = settings;
 
@@ -46,18 +67,44 @@ namespace ScriptComposer
                 Path.GetFileNameWithoutExtension(assembly));
         }
 
-        public static AssemblyInfo LoadFromFile(string assembly)
+        public static AssemblyInfo LoadFromFile(BuildSettings settings, string assemblyName)
         {
-            return null;
-        }
+            var destRoot = string.Format(
+                "{0}/{1}/{2}",
+                AssetUtil.GetProjectRoot(),
+                settings.SourceCodeCacheRoot,
+                assemblyName);
 
-        public bool SaveToFile(bool force = false)
-        {
-            if (force)
+            var configPath = string.Format(
+                "{0}/{1}.json",
+                destRoot, assemblyName);
+            var jsonStr = File.ReadAllText(configPath);
+            var instance = JsonUtility.FromJson<AssemblyInfo>(jsonStr);
+
+            instance._settings = settings;
+            instance._destRoot = destRoot;
+            foreach (var source in instance.Sources)
             {
-                ClearFiles();
+                source.SetupInternal(settings, assemblyName);
             }
 
+            return instance;
+        }
+
+        public void SaveToFile()
+        {
+            DeleteCaches();
+            Directory.CreateDirectory(_destRoot);
+
+            var configPath = string.Format(
+                "{0}/{1}.json",
+                _destRoot, Path.GetFileNameWithoutExtension(Assembly));
+            var jsonStr = JsonUtility.ToJson(this);
+            File.WriteAllText(configPath, jsonStr);
+        }
+
+        public void StashScripts()
+        {
             var projectRoot = AssetUtil.GetProjectRoot();
 
             foreach (var source in Sources)
@@ -67,28 +114,17 @@ namespace ScriptComposer
                 AssetUtil.CopyFile(sourcePath, destPath, true);
             }
 
-            var configPath = string.Format(
-                "{0}/{1}.json",
-                _destRoot, Path.GetFileNameWithoutExtension(Assembly));
-            var jsonStr = JsonUtility.ToJson(this);
-            File.WriteAllText(configPath, jsonStr);
-
-            return true;
+            foreach (var source in Sources)
+            {
+                AssetDatabase.DeleteAsset(source.FilePath);
+            }
         }
 
-        public void ClearFiles()
+        public void DeleteCaches()
         {
             if (Directory.Exists(_destRoot))
             {
                 Directory.Delete(_destRoot, true);
-            }
-        }
-
-        public void ClearSourceAssets()
-        {
-            foreach (var source in Sources)
-            {
-                AssetDatabase.DeleteAsset(source.FilePath);
             }
         }
 

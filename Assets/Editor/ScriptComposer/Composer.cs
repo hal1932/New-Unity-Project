@@ -37,6 +37,7 @@ namespace ScriptComposer
                 EditorUtil.AssetUtil.CopyFile(source, dest, true);
             }
 
+            // 既にビルド済みアセンブリがいたら消す
             var outputPath = string.Format("{0}/{1}.dll", _settings.AssemblyRoot, assemblyName);
             if (!AssetUtil.AssetExists(outputPath))
             {
@@ -48,6 +49,7 @@ namespace ScriptComposer
 
             var error = false;
 
+            // ビルド
             var managedDllDir = Preference.MonoDirectory + "/../Managed";
             using (var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
             {
@@ -102,22 +104,59 @@ namespace ScriptComposer
                 return null;
             }
 
+            // ビルドしたアセンブリをインポートして、ソースコードを退避
             if (File.Exists(outputAssemblyPath))
             {
                 AssetDatabase.ImportAsset(outputPath);
 
                 var info = new AssemblyInfo(_settings, outputPath, scripts);
-                info.SaveToFile(true);
-                info.ClearSourceAssets();
+                info.SaveToFile();
+                info.StashScripts();
 
                 return outputPath;
             }
             return null;
         }
 
-        public string[] RevertToScripts(string assembly)
+        public string[] RevertToScripts(BuildSettings settings, string assemblyName)
         {
-            return null;
+            var info = AssemblyInfo.LoadFromFile(settings, assemblyName);
+
+            var error = false;
+
+            // ソースコードのタイムスタンプチェック
+            foreach (var source in info.Sources)
+            {
+                var scriptPath = source.GetCachedScriptPath();
+
+                var fileInfo = new FileInfo(scriptPath);
+                if (!fileInfo.Exists)
+                {
+                    Debug.LogErrorFormat("the CONFLICT is found at {0}", scriptPath);
+                    error = true;
+                }
+            }
+
+            if (error)
+            {
+                return null;
+            }
+
+            // ソースコードを書き戻す
+            foreach (var source in info.Sources)
+            {
+                var scriptPath = source.GetCachedScriptPath();
+                var destPath = source.FilePath;
+                AssetUtil.CopyFile(scriptPath, destPath, true);
+                AssetDatabase.ImportAsset(destPath);
+            }
+
+            // アセンブリを消す
+            AssetDatabase.DeleteAsset(info.Assembly);
+
+            info.DeleteCaches();
+
+            return info.Sources.Select(x => x.FilePath).ToArray();
         }
 
         private BuildSettings _settings;

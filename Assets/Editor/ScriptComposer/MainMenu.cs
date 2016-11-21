@@ -28,27 +28,51 @@ namespace ScriptComposer
             var scripts = Selection.objects.Select(obj => AssetDatabase.GetAssetPath(obj))
                 .ToArray();
 
+            string assemblyPath;
             using (new LockReloadAssemblyScope())
             using (new LockReloadAssetScope())
             {
                 var settings = BuildSettings.FindOrCreateInstance();
                 var composer = new Composer(settings);
-                var outputPath = composer.BuildScripts(scripts);
-                Debug.Log(outputPath);
+                assemblyPath = composer.BuildScripts(scripts);
 
                 AssetDatabase.SaveAssets();
             }
+
+            EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(assemblyPath));
         }
 
         [MenuItem(cItemName_Disassemble)]
         public static void Disassemble()
         {
+            var assemblyName = Path.GetFileNameWithoutExtension(
+                AssetDatabase.GetAssetPath(Selection.activeObject));
+
+            string[] scriptPaths;
+            using (new LockReloadAssemblyScope())
+            using (new LockReloadAssetScope())
+            {
+                var settings = BuildSettings.FindOrCreateInstance();
+                var composer = new Composer(settings);
+                scriptPaths = composer.RevertToScripts(settings, assemblyName);
+
+                AssetDatabase.SaveAssets();
+            }
+
+            if (scriptPaths.Length == 1)
+            {
+                EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<Object>(scriptPaths[0]));
+            }
+            else
+            {
+                Selection.objects = scriptPaths.Select(x => AssetDatabase.LoadAssetAtPath<Object>(x))
+                    .ToArray();
+            }
         }
 
         [MenuItem(cItemName_Settings, true)]
         [MenuItem(cItemName_Assemble, true)]
-        [MenuItem(cItemName_Disassemble, true)]
-        public static bool CanApplyMenu()
+        public static bool CanApplyScriptMenu()
         {
             var targets = Selection.objects;
 
@@ -68,6 +92,23 @@ namespace ScriptComposer
             return true;
         }
 
-        private static string _monoPath;
+        [MenuItem(cItemName_Settings, true)]
+        [MenuItem(cItemName_Disassemble, true)]
+        public static bool CanApplyAssemblyMenu()
+        {
+            var target = Selection.activeObject;
+
+            if (target == null)
+            {
+                return false;
+            }
+
+            if (target.GetType() != typeof(DefaultAsset))
+            {
+                return false;
+            }
+
+            return AssetDatabase.GetAssetPath(target).EndsWith(".dll");
+        }
     }
 }

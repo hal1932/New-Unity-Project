@@ -88,14 +88,12 @@
     <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
       <HintPath>Library\UnityAssemblies\SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
     </Reference>
-    <Reference Include="MiniJSON">
-      <HintPath>Assets\Plugins\MiniJSON.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Editor\EditorUtil\Assetutil.cs" />
     <Compile Include="Assets\Editor\EditorUtil\Disposable.cs" />
     <Compile Include="Assets\Editor\EditorUtil\ScopeGUI.cs" />
+    <Compile Include="Assets\Editor\MiniJSON.cs" />
     <Compile Include="Assets\Editor\ResourceLocker.cs" />
     <Compile Include="Assets\Editor\ScriptComposer\AssemblyInfo.cs" />
     <Compile Include="Assets\Editor\ScriptComposer\BuildSettings.cs" />
