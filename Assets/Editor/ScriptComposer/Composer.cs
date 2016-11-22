@@ -23,12 +23,7 @@ namespace ScriptComposer
             // スクリプトのパスをいちいち指定してたらコマンドラインが文字数オーバーするかもしれないから
             // 一旦テンポラリに全部コピーして *.cs で指定できるようにする。
             var tmpScriptsDir = AssetUtil.CombinePath(Application.temporaryCachePath, assemblyName);
-
-            if (Directory.Exists(tmpScriptsDir))
-            {
-                Directory.Delete(tmpScriptsDir, true);
-                Directory.CreateDirectory(tmpScriptsDir);
-            }
+            AssetUtil.CleanupDirectory(tmpScriptsDir);
 
             foreach (var script in scripts)
             {
@@ -39,37 +34,30 @@ namespace ScriptComposer
 
             // 既にビルド済みアセンブリがいたら消す
             var outputPath = AssetUtil.CombinePath(_settings.AssemblyRoot, assemblyName + ".dll");
-            if (!AssetUtil.AssetExists(outputPath))
-            {
-                AssetDatabase.DeleteAsset(outputPath);
-            }
-            AssetUtil.CreateAssetDirectory(Path.GetDirectoryName(outputPath));
+            AssetUtil.CleanupDirectory(Path.GetDirectoryName(outputPath));
 
             var outputAssemblyPath = AssetUtil.CombinePath(ProjectInfo.RootPath, outputPath);
 
             // ビルド
-            outputAssemblyPath = ScriptBuilder.Build(
+            var buildSuccess = ScriptBuilder.Build(
                 outputAssemblyPath,
                 new[] { tmpScriptsDir + "/*.cs" },
                 output => Debug.Log(output),
                 error => Debug.LogError(error));
-            if (string.IsNullOrEmpty(outputAssemblyPath))
+            if (!buildSuccess)
             {
+                AssetUtil.DeleteFile(outputAssemblyPath);
                 return null;
             }
 
             // ビルドしたアセンブリをインポートして、ソースコードを退避
-            if (File.Exists(outputAssemblyPath))
-            {
-                AssetDatabase.ImportAsset(outputPath);
+            AssetDatabase.ImportAsset(outputPath);
 
-                var info = new AssemblyInfo(_settings, outputPath, scripts);
-                info.SaveToFile();
-                info.StashScripts();
+            var info = new AssemblyInfo(_settings, outputPath, scripts);
+            info.SaveToFile();
+            info.StashScripts();
 
-                return outputPath;
-            }
-            return null;
+            return outputPath;
         }
 
         public string[] RevertToScripts(BuildSettings settings, string assemblyName)
@@ -78,7 +66,7 @@ namespace ScriptComposer
 
             var error = false;
 
-            // ソースコードのタイムスタンプチェック
+            // ソースコードの書き戻し先をチェック
             foreach (var source in info.Sources)
             {
                 var scriptPath = source.GetCachedScriptPath();
@@ -110,7 +98,7 @@ namespace ScriptComposer
             // アセンブリを消す
             AssetDatabase.DeleteAsset(info.Assembly);
 
-            info.DeleteCaches();
+            info.CleanupCache();
 
             return info.Sources.Select(x => x.AssetPath).ToArray();
         }

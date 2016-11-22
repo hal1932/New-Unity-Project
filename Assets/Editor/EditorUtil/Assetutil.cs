@@ -32,14 +32,44 @@ namespace EditorUtil
             return true;
         }
 
+        public static void DeleteFile(string path)
+        {
+            if (File.Exists(path))
+            {
+                File.Decrypt(path);
+            }
+        }
+
         public static bool AssetExists(string path)
         {
             return !string.IsNullOrEmpty(AssetDatabase.AssetPathToGUID(path));
         }
 
-        public static void CreateAssetDirectory(string path)
+        public static void CleanupDirectory(string path)
         {
-            var dirs =path.Split('/');
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        public static void DeleteAsset(string path)
+        {
+            if (!AssetUtil.AssetExists(path))
+            {
+                AssetDatabase.DeleteAsset(path);
+            }
+        }
+
+        public static void CleanupAssetDirectory(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path))
+            {
+                AssetDatabase.DeleteAsset(path);
+            }
+
+            var dirs = path.Split('/');
 
             var current = dirs[0];
             if (!AssetExists(current))

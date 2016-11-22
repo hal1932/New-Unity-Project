@@ -85,7 +85,7 @@ namespace ScriptComposer
 
         public void SaveToFile()
         {
-            DeleteCaches();
+            CleanupCache();
             Directory.CreateDirectory(_destRoot);
 
             var configPath = AssetUtil.CombinePath(
@@ -120,7 +120,7 @@ namespace ScriptComposer
             }
         }
 
-        public void DeleteCaches()
+        public void CleanupCache()
         {
             if (Directory.Exists(_destRoot))
             {
