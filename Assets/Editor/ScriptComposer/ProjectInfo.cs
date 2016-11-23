@@ -10,7 +10,7 @@ namespace ScriptComposer
 
         public static string UnityAssemblyRoot
         {
-            get { return AssetUtil.CombinePath(Preference.MonoDirectory, "..", "Managed"); }
+            get { return AssetUtil.CombinePath(EditorUtil.Preference.MonoDirectory, "..", "Managed"); }
         }
 
         static ProjectInfo()

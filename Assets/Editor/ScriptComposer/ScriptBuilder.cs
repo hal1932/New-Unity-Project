@@ -20,9 +20,9 @@ namespace ScriptComposer
             using (var process = Process.Start(new ProcessStartInfo()
             {
 #if UNITY_EDITOR_WIN
-                FileName = Preference.MonoDirectory + "/bin/smcs.bat",
+                FileName = EditorUtil.Preference.MonoDirectory + "/bin/smcs.bat",
 #elif UNITY_EDITOR_OSX
-                FileName = Preference.MonoDirectory + "/bin/smcs",
+                FileName = EditorUtil.Preference.MonoDirectory + "/bin/smcs",
 #endif
                 Arguments = string.Join(
                     " ",
