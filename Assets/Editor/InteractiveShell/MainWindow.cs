@@ -58,12 +58,9 @@ public class MainWindow : EditorWindow
         Evaluator.MessageOutput = new StringWriter();
 
         Evaluator.Run("using UnityEngine; using UnityEditor; using System.Linq;");
-        var method = Evaluator.Compile(_sourceCode);
-        if (method != null)
+        var result = Evaluator.Evaluate(_sourceCode);
+        if (result != null)
         {
-            var result = new object();
-            method.Invoke(ref result);
-
             var type = result.GetType();
             if (type.IsArray)
             {
