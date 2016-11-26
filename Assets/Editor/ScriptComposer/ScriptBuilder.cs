@@ -16,6 +16,7 @@ namespace ScriptComposer
             var result = true;
 
             AssetUtil.DeleteFile(outputPath);
+            AssetUtil.CleanupDirectory(Path.GetDirectoryName(outputPath));
 
             using (var process = Process.Start(new ProcessStartInfo()
             {

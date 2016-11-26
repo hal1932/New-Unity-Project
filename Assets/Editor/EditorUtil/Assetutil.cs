@@ -52,6 +52,10 @@ namespace EditorUtil
                 Directory.Delete(path, true);
                 Directory.CreateDirectory(path);
             }
+            else
+            {
+                Directory.CreateDirectory(path);
+            }
         }
 
         public static void DeleteAsset(string path)

@@ -11,9 +11,11 @@ namespace ScriptComposer
         //const string cItemName_Settings = "Assets/ScriptComposer/設定";
         //const string cItemName_Assemble = "Assets/ScriptComposer/スクリプトをビルド";
         //const string cItemName_Disassemble = "Assets/ScriptComposer/DLLをスクリプトに戻す";
+        //const string cItemName_CreateIvyXml = "Assets/ScriptComposer/unitypackageをエクスポート";
         const string cItemName_Settings = "Assets/ScriptComposer_Settings";
         const string cItemName_Assemble = "Assets/ScriptComposer_Assemble";
         const string cItemName_Disassemble = "Assets/ScriptComposer_Disassemble";
+        const string cItemName_ExportPackage = "Assets/ScriptComposer_ExportPackage";
 
         [MenuItem(cItemName_Settings)]
         public static void SelectSettingsObject()
@@ -33,28 +35,15 @@ namespace ScriptComposer
                         .Select(guid => AssetDatabase.GUIDToAssetPath(guid)))
                 .ToArray();
 
-            string assemblyName;
-            switch (Preference.AssemblyNameSelection)
-            {
-                case AssemblyNameSelection.FirstSelection:
-                    assemblyName = Path.GetFileNameWithoutExtension(paths.First());
-                    break;
-
-                case AssemblyNameSelection.LastSelection:
-                    assemblyName = Path.GetFileNameWithoutExtension(paths.Last());
-                    break;
-
-                default:
-                    throw new System.Exception("invalid Preference.AssemblyNameSelection");
-            }
-
             string assemblyPath;
             using (new LockReloadAssemblyScope())
             using (new LockReloadAssetScope())
             {
                 var settings = BuildSettings.FindOrCreateInstance();
                 var composer = new Composer(settings);
-                assemblyPath = composer.BuildScripts(scripts, assemblyName);
+                assemblyPath = composer.BuildScripts(
+                    scripts,
+                    Preference.GetAssemblyName(paths));
 
                 AssetDatabase.SaveAssets();
             }
@@ -90,7 +79,35 @@ namespace ScriptComposer
             }
         }
 
+        [MenuItem(cItemName_ExportPackage)]
+        public static void ExportPackage()
+        {
+            var paths = Selection.objects.Select(obj => AssetDatabase.GetAssetPath(obj))
+                .ToArray();
+
+            var exportPath = AssetUtil.CombinePath(
+                Preference.ExportDirectory,
+                Preference.GetAssemblyName(paths) + ".unitypackage");
+
+            AssetUtil.DeleteFile(exportPath);
+            if (!Directory.Exists(Path.GetDirectoryName(exportPath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(exportPath));
+            }
+
+            AssetDatabase.ExportPackage(
+                paths,
+                exportPath,
+                ExportPackageOptions.Recurse | ExportPackageOptions.IncludeDependencies);
+        }
+
         [MenuItem(cItemName_Settings, true)]
+        [MenuItem(cItemName_ExportPackage, true)]
+        public static bool CanApplyMenu()
+        {
+            return CanApplyAssembleMenu() || CanApplyDisassembleMenu();
+        }
+
         [MenuItem(cItemName_Assemble, true)]
         public static bool CanApplyAssembleMenu()
         {
@@ -112,7 +129,6 @@ namespace ScriptComposer
             return paths.Any(path => path.EndsWith(".cs"));
         }
 
-        [MenuItem(cItemName_Settings, true)]
         [MenuItem(cItemName_Disassemble, true)]
         public static bool CanApplyDisassembleMenu()
         {

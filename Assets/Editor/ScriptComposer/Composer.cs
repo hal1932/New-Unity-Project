@@ -33,8 +33,8 @@ namespace ScriptComposer
             }
 
             // 既にビルド済みアセンブリがいたら消す
-            var outputPath = AssetUtil.CombinePath(_settings.AssemblyRoot, assemblyName + ".dll");
-            AssetUtil.CleanupDirectory(Path.GetDirectoryName(outputPath));
+            var outputPath = AssetUtil.CombinePath(_settings.AssemblyRoot, assemblyName, assemblyName + ".dll");
+            AssetUtil.CleanupAssetDirectory(Path.GetDirectoryName(outputPath));
 
             var outputAssemblyPath = AssetUtil.CombinePath(ProjectInfo.RootPath, outputPath);
 
