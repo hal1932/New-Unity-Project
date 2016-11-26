@@ -5,6 +5,8 @@ using Mono.CSharp;
 using System.Reflection;
 using System.IO;
 using System.Linq;
+using System;
+using System.Text;
 
 public class MainWindow : EditorWindow
 {
@@ -14,19 +16,40 @@ public class MainWindow : EditorWindow
         GetWindow<MainWindow>().Show();
     }
 
-    public void Awake()
+    [InitializeOnLoadMethod]
+    public static void Initialize()
     {
-        ClearContext();
+        EditorApplication.update += Update;
+    }
+
+    private static void Update()
+    {
+        if (EditorApplication.isCompiling)
+        {
+            return;
+        }
+
+        // https://github.com/hecomi/uREPL/blob/master/Assets/uREPL/Scripts/Core/Evaluator.cs
+        //Evaluator.Init(new string[] { });
+        for (var i = 0; i < 2; ++i)
+        {
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (assembly != null)
+                {
+                    Evaluator.ReferenceAssembly(assembly);
+                }
+            }
+            Evaluator.Evaluate("null;");
+        }
+
+        Evaluator.Run("using UnityEngine; using UnityEditor; using System.Linq;");
+
+        EditorApplication.update -= Update;
     }
 
     public void OnGUI()
     {
-        if (GUILayout.Button("clear", EditorStyles.toolbarButton))
-        {
-            ClearContext();
-            _sourceCode = string.Empty;
-        }
-
         var height = position.height - 10;
         _scrollPosition = EditorGUILayout.BeginScrollView(_scrollPosition, GUILayout.Height(height));
         _sourceCode = EditorGUILayout.TextArea(_sourceCode, GUILayout.ExpandHeight(true));
@@ -41,13 +64,6 @@ public class MainWindow : EditorWindow
         }
     }
 
-    private void ClearContext()
-    {
-        Evaluator.Init(new string[] { });
-        Evaluator.ReferenceAssembly(typeof(UnityEngine.Object).Assembly);
-        Evaluator.ReferenceAssembly(typeof(UnityEditor.Editor).Assembly);
-    }
-
     private void Evaluate()
     {
         if (string.IsNullOrEmpty(_sourceCode))
@@ -55,11 +71,27 @@ public class MainWindow : EditorWindow
             return;
         }
 
+        var sourceCode = new StringBuilder();
+        foreach (var line in _sourceCode.Split('\n').Select(x => x.Trim()))
+        {
+            if (line.StartsWith("using"))
+            {
+                Evaluator.Run(line);
+            }
+            else
+            {
+                sourceCode.AppendLine(line);
+            }
+        }
+        sourceCode.Append(";");
+
         Evaluator.MessageOutput = new StringWriter();
 
-        Evaluator.Run("using UnityEngine; using UnityEditor; using System.Linq;");
-        var result = Evaluator.Evaluate(_sourceCode);
-        if (result != null)
+        object result;
+        bool isResultSet;
+        Evaluator.Evaluate(sourceCode.ToString(), out result, out isResultSet);
+
+        if (isResultSet)
         {
             var type = result.GetType();
             if (type.IsArray)
@@ -82,6 +114,7 @@ public class MainWindow : EditorWindow
             }
         }
 
+        Evaluator.MessageOutput.Flush();
         var output = Evaluator.MessageOutput.ToString();
         if (!string.IsNullOrEmpty(output))
         {
