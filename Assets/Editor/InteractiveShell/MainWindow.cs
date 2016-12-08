@@ -10,10 +10,12 @@ using System.Text;
 
 public class MainWindow : EditorWindow
 {
-    [MenuItem("Shell/Interactive")]
+    [MenuItem("Shell/C# Interactive")]
     public static void OpenWindow()
     {
-        GetWindow<MainWindow>().Show();
+        var window = GetWindow<MainWindow>();
+        window.titleContent = new GUIContent("C# Interactive");
+        window.Show();
     }
 
     [InitializeOnLoadMethod]

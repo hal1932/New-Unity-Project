@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Editor:5</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.4.2f2</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -91,12 +93,35 @@
     <Reference Include="Mono.CSharp">
       <HintPath>Assets\Plugins\Mono.CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>Assets\Plugins\NPOI\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI">
+      <HintPath>Assets\Plugins\NPOI\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>Assets\Plugins\NPOI\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>Assets\Plugins\NPOI\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>Assets\Plugins\NPOI\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Editor\EditorUtil\Assetutil.cs" />
     <Compile Include="Assets\Editor\EditorUtil\Disposable.cs" />
     <Compile Include="Assets\Editor\EditorUtil\Preference.cs" />
-    <Compile Include="Assets\Editor\EditorUtil\ScopeGUI.cs" />
+    <Compile Include="Assets\Editor\EditorUtil\ScopedGUI.cs" />
+    <Compile Include="Assets\Editor\EditorUtil\ScriptableObjectUtil.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\DictionarySet.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\ExcelReader.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\FileImportSettings.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\FileUpdateWatcher.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\LocalizedDictionary.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\MainMenu.cs" />
+    <Compile Include="Assets\Editor\ExcelLocalization\Translator.cs" />
     <Compile Include="Assets\Editor\InteractiveShell\MainWindow.cs" />
     <Compile Include="Assets\Editor\ScriptComposer\AssemblyInfo.cs" />
     <Compile Include="Assets\Editor\ScriptComposer\BuildSettings.cs" />
@@ -105,6 +130,9 @@
     <Compile Include="Assets\Editor\ScriptComposer\Preference.cs" />
     <Compile Include="Assets\Editor\ScriptComposer\ProjectInfo.cs" />
     <Compile Include="Assets\Editor\ScriptComposer\ScriptBuilder.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Plugins\NPOI\NPOI.XML" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

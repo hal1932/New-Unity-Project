@@ -66,17 +66,12 @@ namespace EditorUtil
             }
         }
 
-        public static void CleanupAssetDirectory(string path)
+        public static void CreateAssetDirectory(string path)
         {
-            if (AssetDatabase.IsValidFolder(path))
-            {
-                AssetDatabase.DeleteAsset(path);
-            }
-
             var dirs = path.Split('/');
 
             var current = dirs[0];
-            if (!AssetExists(current))
+            if (!AssetDatabase.IsValidFolder(current))
             {
                 AssetDatabase.CreateFolder(string.Empty, current);
             }
@@ -85,13 +80,29 @@ namespace EditorUtil
             {
                 current += '/' + dirs[i];
 
-                if (!AssetExists(current))
+                if (!AssetDatabase.IsValidFolder(current))
                 {
                     AssetDatabase.CreateFolder(
                         Path.GetDirectoryName(current),
                         Path.GetFileName(current));
                 }
             }
+        }
+
+        public static void CleanupAssetDirectory(string path)
+        {
+            if (AssetDatabase.IsValidFolder(path))
+            {
+                AssetDatabase.DeleteAsset(path);
+            }
+            CreateAssetDirectory(path);
+        }
+
+        public static string FindScriptPath<T>()
+        {
+            return AssetDatabase.FindAssets("t:script " + typeof(T).Name)
+                .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
+                .FirstOrDefault();
         }
     }
 }

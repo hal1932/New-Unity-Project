@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using EditorUtil;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -12,32 +13,22 @@ namespace ScriptComposer
 
         public static BuildSettings FindOrCreateInstance()
         {
-            var thisType = typeof(BuildSettings);
+            var thisPath = AssetUtil.FindScriptPath<BuildSettings>();
+            var settingsPath = string.Format("{0}/settings.asset", Path.GetDirectoryName(thisPath));
 
-            var settingsPath = AssetDatabase.FindAssets("t:" + thisType.FullName)
-                .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                .FirstOrDefault();
-
-            if (settingsPath == null)
+            BuildSettings item;
+            if (!ScriptableObjectUtil.FindOrCreateObject(out item, settingsPath))
             {
-                var targetPath = string.Format(thisType.FullName.Replace('.', '/') + ".cs");
-                var thisPath = AssetDatabase.FindAssets("t:Script " + thisType.Name)
-                    .Select(guid => AssetDatabase.GUIDToAssetPath(guid))
-                    .First(path => path.EndsWith(targetPath));
-
-                settingsPath = string.Format("{0}/settings.asset", Path.GetDirectoryName(thisPath));
-
-                var item = CreateInstance<BuildSettings>();
                 item.AssemblyRoot = "Assets/Plugins";
                 item.SourceCodeCacheRoot = "Assets/Plugins/sources";
 
                 AssetDatabase.CreateAsset(item, settingsPath);
                 AssetDatabase.SaveAssets();
 
-                Selection.activeObject = item;
             }
 
-            return AssetDatabase.LoadAssetAtPath<BuildSettings>(settingsPath);
+            Selection.activeObject = item;
+            return item;
         }
 
         public void OnValidate()
