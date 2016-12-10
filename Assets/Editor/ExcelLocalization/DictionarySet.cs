@@ -40,10 +40,40 @@ namespace ExcelLocalization
             return instance;
         }
 
-        public void SetText(string page, string key, string value)
+        public IEnumerable<string> EnumerateKeys(string page)
         {
             var index = Array.IndexOf(_pageNumbers, page);
-            _dictionaries[index][key] = value;
+            return _dictionaries[index].EnumerateKeys();
+        }
+
+        public bool SetText(string page, string key, string value)
+        {
+            var index = Array.IndexOf(_pageNumbers, page);
+            if (string.IsNullOrEmpty(value))
+            {
+                _dictionaries[index].RemoveItem(key);
+                return true;
+            }
+            else
+            {
+                return _dictionaries[index].SetItem(key, value);
+            }
+        }
+
+        public void RemoveText(string page, string key)
+        {
+            SetText(page, key, null);
+        }
+
+        public bool TryGetText(string page, string key, out string value)
+        {
+            var index = Array.IndexOf(_pageNumbers, page);
+            if (index < 0)
+            {
+                value = null;
+                return false;
+            }
+            return _dictionaries[index].TryGetString(key, out value);
         }
 
         public string GetText(string page, string key)
