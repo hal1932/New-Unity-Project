@@ -3,6 +3,7 @@ using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -104,7 +105,8 @@ namespace ExcelLocalization
     {
         public ExcelReader(string filepath)
         {
-            _book = new XSSFWorkbook(filepath);
+            _bookReader = new FileStream(filepath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            _book = new XSSFWorkbook(_bookReader);
             SetDisposingAction(() => Close());
         }
 
@@ -127,9 +129,16 @@ namespace ExcelLocalization
             }
 #else
             _book = default(XSSFWorkbook);
+
+            if (_bookReader != null)
+            {
+                _bookReader.Dispose();
+                _bookReader = null;
+            }
 #endif
         }
 
+        private Stream _bookReader;
         private XSSFWorkbook _book;
     }
 }

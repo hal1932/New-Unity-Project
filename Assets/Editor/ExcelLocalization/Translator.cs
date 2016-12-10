@@ -64,32 +64,37 @@ namespace ExcelLocalization
                 // 辞書ごとに差分更新する
                 foreach (var sheet in sheets)
                 {
-                    foreach (var itemsDic in sheet.Value)
+                    var page = sheet.Key;
+                    var itemDics = sheet.Value;
+
+                    var currentItems = new List<string>();
+
+                    foreach (var itemsDic in itemDics)
                     {
-                        var itemName = itemsDic.Key;
-                        var items = itemsDic.Value;
+                        var itemName = itemsDic.Key; // テキスト名
+                        var items = itemsDic.Value;  // 全言語分のテキスト
 
-                        // TODO: 以下、もっとループ回数減らせる気がする
-
-                        var currentItems = new List<string>();
                         foreach (var dicSetItem in dicSets)
                         {
                             var dicLang = dicSetItem.Key;
                             var dicSet = dicSetItem.Value;
-                            updated |= dicSet.SetText(sheet.Key, itemName, items[dicLang]);
+                            updated |= dicSet.SetText(page, itemName, items[dicLang]);
                             currentItems.Add(itemName);
                         }
+                    }
 
-                        foreach (var dicSetItem in dicSets)
+                    currentItems.Distinct();
+
+                    foreach (var dicSetItem in dicSets)
+                    {
+                        var dicSet = dicSetItem.Value;
+                        var removedKeys = dicSet.EnumerateKeys(page)
+                            .Except(currentItems)
+                            .ToArray();
+                        foreach (var removedKey in removedKeys)
                         {
-                            var dicSet = dicSetItem.Value;
-                            var removedKeys = dicSet.EnumerateKeys(sheet.Key)
-                                .Except(currentItems);
-                            foreach (var removedKey in removedKeys)
-                            {
-                                dicSet.RemoveText(sheet.Key, removedKey);
-                                updated = true;
-                            }
+                            dicSet.RemoveText(sheet.Key, removedKey);
+                            updated = true;
                         }
                     }
                 }

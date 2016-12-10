@@ -49,7 +49,7 @@ namespace ExcelLocalization
         public bool SetText(string page, string key, string value)
         {
             var index = Array.IndexOf(_pageNumbers, page);
-            if (string.IsNullOrEmpty(value))
+            if (index >= 0 && string.IsNullOrEmpty(value))
             {
                 _dictionaries[index].RemoveItem(key);
                 return true;

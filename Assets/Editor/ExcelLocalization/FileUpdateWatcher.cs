@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEditor;
 using EditorUtil;
 using System.Linq;
+using System.IO;
 
 namespace ExcelLocalization
 {
@@ -27,7 +28,10 @@ namespace ExcelLocalization
                 return;
             }
 
-            Debug.Log(excelPath);
+            var outputDirectory = AssetUtil.CombinePath(
+                Path.GetDirectoryName(excelPath),
+                Path.GetFileNameWithoutExtension(excelPath));
+            Translator.UpdateDictionaries(excelPath, outputDirectory);
         }
     }
 }

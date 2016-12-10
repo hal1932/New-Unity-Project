@@ -107,7 +107,7 @@ namespace ExcelLocalization
 
         public IEnumerable<string> EnumerateKeys()
         {
-            foreach (var bucket in _buckets)
+            foreach (var bucket in _buckets.Where(x => x != null))
             {
                 foreach (var item in bucket)
                 {
