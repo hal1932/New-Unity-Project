@@ -32,7 +32,7 @@ namespace ExcelLocalization
         {
             get
             {
-                return Gestring(key);
+                return GetString(key);
             }
 
             set
@@ -49,7 +49,7 @@ namespace ExcelLocalization
             _buckets = new List<LocalizedItem>[hashSize];
         }
 
-        public bool TryGestring(string key, out string value)
+        public bool TryGetString(string key, out string value)
         {
             value = default(string);
 
@@ -72,24 +72,94 @@ namespace ExcelLocalization
             return false;
         }
 
-        private string Gestring(string key)
+        public void RemoveItem(string key)
         {
-            string value;
-            if (TryGestring(key, out value))
+            var hash = GetItemHash(key);
+            if (_buckets[hash] == null || _buckets[hash].Count == 0)
             {
-                return value;
+                return;
             }
-            throw new KeyNotFoundException(key.ToString());
+
+            var keyHash = key.GetHashCode();
+
+            var index = 0;
+            for (; index < _buckets[hash].Count; ++index)
+            {
+                if (_buckets[hash][index].KeyHash == keyHash)
+                {
+                    _buckets[hash].RemoveAt(index);
+                    break;
+                }
+            }
+
+            if (_buckets[hash].Count == 0)
+            {
+                _buckets[hash] = null;
+            }
+            else
+            {
+                for (; index < _buckets[hash].Count - 1; ++index)
+                {
+                    _buckets[hash][index] = _buckets[hash][index + 1];
+                }
+            }
         }
 
-        private void SetItem(string key, string value)
+        public IEnumerable<string> EnumerateKeys()
+        {
+            foreach (var bucket in _buckets)
+            {
+                foreach (var item in bucket)
+                {
+                    yield return item.Key;
+                }
+            }
+        }
+
+        public bool ContainsKey(string key)
+        {
+            var hash = GetItemHash(key);
+            if (_buckets[hash] == null || _buckets[hash].Count == 0)
+            {
+                return false;
+            }
+            return _buckets[hash].Any(item => item.KeyHash == key.GetHashCode());
+        }
+
+        public bool SetItem(string key, string value)
         {
             var hash = GetItemHash(key);
             if (_buckets[hash] == null)
             {
                 _buckets[hash] = new List<LocalizedItem>();
             }
-            _buckets[hash].Add(new LocalizedItem(key.GetHashCode(), key, value));
+
+            var keyHash = key.GetHashCode();
+            var item = _buckets[hash].FirstOrDefault(x => x.KeyHash == keyHash);
+            if (item == null)
+            {
+                _buckets[hash].Add(new LocalizedItem(key.GetHashCode(), key, value));
+                return true;
+            }
+            else
+            {
+                if (item.Value != value)
+                {
+                    item.Value = value;
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        private string GetString(string key)
+        {
+            string value;
+            if (TryGetString(key, out value))
+            {
+                return value;
+            }
+            throw new KeyNotFoundException(key.ToString());
         }
 
         private int GetItemHash(string key)

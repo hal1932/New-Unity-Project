@@ -22,7 +22,7 @@ namespace ExcelLocalization
                 Path.GetDirectoryName(inputFile),
                 Path.GetFileNameWithoutExtension(inputFile));
 
-            Translator.Execute(inputFile, outputDirectory);
+            Translator.UpdateDictionaries(inputFile, outputDirectory);
         }
 
         [MenuItem(cItemName_BeginWatchExcel)]
@@ -88,6 +88,7 @@ namespace ExcelLocalization
                 {
                     set.SetText(page, "aaa", "aaa" + page + lang);
                     set.SetText(page, "bbb", "bbb" + page + lang);
+                    set.SetText(page, "bbb", null);
                 }
             }
 
