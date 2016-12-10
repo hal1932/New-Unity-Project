@@ -40,6 +40,11 @@ namespace ExcelLocalization
             return instance;
         }
 
+        public IEnumerable<string> EnumeratePages()
+        {
+            return _pageNumbers.Where(page => !string.IsNullOrEmpty(page));
+        }
+
         public IEnumerable<string> EnumerateKeys(string page)
         {
             var index = Array.IndexOf(_pageNumbers, page);

@@ -32,6 +32,20 @@ namespace ExcelLocalization
                 Path.GetDirectoryName(excelPath),
                 Path.GetFileNameWithoutExtension(excelPath));
             Translator.UpdateDictionaries(excelPath, outputDirectory);
+
+            var languages = new[] { "ja-JP", "en-US" };
+            foreach (var lang in languages)
+            {
+                var dicPath = AssetUtil.CombinePath(outputDirectory, lang + ".asset");
+                var dic = AssetDatabase.LoadAssetAtPath<DictionarySet>(dicPath);
+                foreach (var page in dic.EnumeratePages())
+                {
+                    foreach (var key in dic.EnumerateKeys(page))
+                    {
+                        Debug.LogFormat("{0} {1} {2} {3}", lang, page, key, dic.GetText(page, key));
+                    }
+                }
+            }
         }
     }
 }
